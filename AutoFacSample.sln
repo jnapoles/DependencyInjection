@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObjectOnDemand", "ObjectOnD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImplicitRelationShip", "ImplicitRelationShip\ImplicitRelationShip.csproj", "{10F13184-8CBE-4FCA-8380-EB9D2DDF0092}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControllingScopeLifeTime", "ControllingScopeLifeTime\ControllingScopeLifeTime.csproj", "{4A67FD08-AFAD-4701-8C35-387D82401C5E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{10F13184-8CBE-4FCA-8380-EB9D2DDF0092}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{10F13184-8CBE-4FCA-8380-EB9D2DDF0092}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{10F13184-8CBE-4FCA-8380-EB9D2DDF0092}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A67FD08-AFAD-4701-8C35-387D82401C5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A67FD08-AFAD-4701-8C35-387D82401C5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A67FD08-AFAD-4701-8C35-387D82401C5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A67FD08-AFAD-4701-8C35-387D82401C5E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
