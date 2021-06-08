@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 using Autofac;
+using Autofac.Configuration;
 using Autofac.Core;
 using Autofac.Features.Indexed;
 using Autofac.Features.Metadata;
 using Autofac.Features.OwnedInstances;
+using Microsoft.Extensions.Configuration;
 using Module = Autofac.Module;
 
 
@@ -67,24 +70,101 @@ namespace Configuration
             builder.RegisterType<Truck>().As<IVehicle>();
         }
     }
+
+
+
+    public interface IOperation
+    {
+        float Calculate(float a, float b);
+    }
+    public interface IOtherOperation
+    {
+        float SumValue(float a, float b);
+    }
+
+    public class Addition : IOperation,IOtherOperation
+    {
+        public float Calculate(float a, float b)
+        {
+            return a + b;
+        }
+
+        public float SumValue(float a, float b)
+        {
+            return (a + b) / 2 * 100;
+        }
+    }
+
+    public class Multiplication : IOperation,IOtherOperation
+    {
+        public float Calculate(float a, float b)
+        {
+            return a * b;
+        }
+
+        public float SumValue(float a, float b)
+        {
+            return (a + b) / 2 * 100;
+        }
+    }
+
+    public class Division : IOperation
+    {
+        public float Calculate(float a, float b)
+        {
+            return a * b;
+        }
+    }
+
+
+    public class CalculationModule : Module
+    {
+        protected override void Load(ContainerBuilder builder)
+        {
+            builder.RegisterType<Multiplication>().As<IOperation>();
+            builder.RegisterType<Addition>().As<IOperation>();
+        }
+    }
     class Program
     {
         static void Main(string[] args)
         {
+            // Modules
+            //var builder = new ContainerBuilder(); 
+            //builder.RegisterModule(new TransporterModule { 
+            //    ObeySpeedLimit = true
+            //});
 
-            var builder = new ContainerBuilder();
+            //var container = builder.Build();
+
+            //var car = container.Resolve<IVehicle>();
+
+            //car.Go();
+
+
+            // Config Json File
 
 
 
-            builder.RegisterModule(new TransporterModule { 
-                ObeySpeedLimit = true
-            });
+            var configBuilder = new ConfigurationBuilder()
+              .SetBasePath(Directory.GetCurrentDirectory())
+              //.AddJsonFile("config.json");
+              .AddJsonFile("ConfigModule.json");
+            var configuration = configBuilder.Build();
 
-            var container = builder.Build();
+            var containerBuilder = new ContainerBuilder();
+            var configModule = new ConfigurationModule(configuration);
+            containerBuilder.RegisterModule(configModule);
 
-            var car = container.Resolve<IVehicle>();
+            using (var container = containerBuilder.Build())
+            {
+                float a = 3, b = 4;
 
-            car.Go();
+                foreach (IOperation op in container.Resolve<IList<IOperation>>())
+                {
+                    Console.WriteLine($"{op.GetType().Name} of {a} and {b} = {op.Calculate(a, b)}");
+                }
+            }
         }
     }
 }
