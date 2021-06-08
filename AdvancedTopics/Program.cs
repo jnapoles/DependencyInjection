@@ -17,6 +17,13 @@ using Autofac.Core.Registration;
 using Autofac.Features.ResolveAnything;
 using Microsoft.Extensions.Configuration;
 using Autofac.Features.Metadata;
+using Autofac.Features.AttributeFilters;
+using System.ComponentModel.Composition;
+using Autofac.Extras.AttributeMetadata;
+using Autofac.Extras.AggregateService;
+using Autofac.Extras.DynamicProxy;
+using Castle.DynamicProxy;
+using System.IO;
 
 namespace AdvancedTopics
 {
@@ -287,6 +294,157 @@ namespace AdvancedTopics
             return "Child";
         }
     }
+
+
+
+
+    [MetadataAttribute]
+    public class AgeMetadataAttribute : Attribute
+    {
+        public int Age { get; private set; }
+
+        public AgeMetadataAttribute(int age)
+        {
+            Age = age;
+        }
+    }
+
+    public interface IArtwork
+    {
+        void Display();
+    }
+
+    [AgeMetadata(100)]
+    public class CenturyArtwork : IArtwork
+    {
+        public void Display()
+        {
+            Console.WriteLine("Displaying a century-old piece");
+        }
+    }
+
+    [AgeMetadata(1000)]
+    public class MillenialArtwork : IArtwork
+    {
+        public void Display()
+        {
+            Console.WriteLine("Displaying a REALLY old piece of art");
+        }
+    }
+
+    public class ArtDisplay
+    {
+        private readonly IArtwork art;
+
+        public ArtDisplay([MetadataFilter("Age", 100)] IArtwork art)
+        {
+            this.art = art;
+        }
+
+        public void Display() { art.Display(); }
+    }
+
+
+
+    public interface IService1 { }
+    public interface IService2 { }
+    public interface IService3 { }
+    public interface IService4 { }
+
+    public class Class1 : IService1 { }
+    public class Class2 : IService2 { }
+    public class Class3 : IService3 { }
+
+    public class Class4 : IService4
+    {
+        private string name;
+
+        public Class4()
+        {
+
+        }
+        public Class4(string name)
+        {
+            if (name == null)
+            {
+                throw new ArgumentNullException(paramName: nameof(name));
+            }
+            this.name = name;
+        }
+    }
+
+    public interface IMyAggregateService
+    {
+        IService1 Service1 { get; }
+        IService2 Service2 { get; }
+        IService3 Service3 { get; }
+        //IService4 Service4 { get; }
+
+        IService4 GetFourthService(string name);
+    }
+
+    public class Consumer
+    {
+        public IMyAggregateService AllServices;
+
+        public Consumer(IMyAggregateService allServices)
+        {
+            if (allServices == null)
+            {
+                throw new ArgumentNullException(paramName: nameof(allServices));
+            }
+            AllServices = allServices;
+        }
+    }
+
+
+
+
+
+
+    public class CallLogger : IInterceptor
+    {
+        private TextWriter output;
+
+        public CallLogger(TextWriter output)
+        {
+            if (output == null)
+            {
+                throw new ArgumentNullException(paramName: nameof(output));
+            }
+            this.output = output;
+        }
+
+        public void Intercept(IInvocation invocation)
+        {
+            var methodName = invocation.Method.Name;
+            output.WriteLine("Calling method {0} with args {1}",
+              methodName,
+              string.Join(",",
+                invocation.Arguments.Select(a => (a ?? "").ToString())
+              )
+            );
+            invocation.Proceed();
+            output.WriteLine("Done calling {0}, result was {1}",
+                methodName, invocation.ReturnValue
+            );
+        }
+    }
+
+    public interface IAudit
+    {
+        int Start(DateTime reportDate);
+    }
+
+    [Intercept(typeof(CallLogger))]
+    public class Audit : IAudit
+    {
+        public virtual int Start(DateTime reportDate)
+        {
+            Console.WriteLine($"Starting report on {reportDate}");
+            return 42;
+        }
+    }
     class Program
     {
         static void Main(string[] args)
@@ -368,6 +526,59 @@ namespace AdvancedTopics
             //    Console.WriteLine(container.Resolve<ChildWithProperty1>().Parent);
             //    Console.WriteLine(container.Resolve<ParentWithConstructor1>().Child);
             //}
+
+
+
+
+            // Attribute base MetaData
+            //var builder = new ContainerBuilder();
+            //builder.RegisterModule<AttributedMetadataModule>();
+            //builder.RegisterType<CenturyArtwork>().As<IArtwork>();
+            //builder.RegisterType<MillenialArtwork>().As<IArtwork>();
+            //builder.RegisterType<ArtDisplay>().WithAttributeFiltering();
+
+
+
+            //using (var container = builder.Build())
+            //{
+            //    container.Resolve<ArtDisplay>().Display();
+            //}
+
+
+
+            // Agregate Services
+            //var cb = new ContainerBuilder();
+            //cb.RegisterAggregateService<IMyAggregateService>();
+            //cb.RegisterAssemblyTypes(typeof(Program).Assembly)
+            //  .Where(t => t.Name.StartsWith("Class"))
+            //  .AsImplementedInterfaces();
+            //cb.RegisterType<Consumer>();
+
+
+
+            //using (var container = cb.Build())
+            //{
+            //    var consumer = container.Resolve<Consumer>();
+            //    //Console.WriteLine(consumer.AllServices.Service3.GetType().Name);
+            //    //Console.WriteLine(consumer.AllServices.Service4.GetType().Name);
+            //    //Console.WriteLine(consumer.AllServices.Service1.GetType().Name);
+            //    Console.WriteLine(consumer.AllServices.GetFourthService("test").GetType().Name);
+            //}
+
+
+
+
+            // Type interceptor
+            var builder = new ContainerBuilder();
+            builder.Register(c => new CallLogger(Console.Out)).As<IInterceptor>().AsSelf();
+            builder.RegisterType<Audit>().As<IAudit>().EnableClassInterceptors();
+            builder.RegisterType<Audit>().As<IAudit>().EnableInterfaceInterceptors();
+
+
+            using (var container = builder.Build())
+            {
+                container.Resolve<IAudit>().Start(DateTime.Now);
+            }
 
         }
     }
