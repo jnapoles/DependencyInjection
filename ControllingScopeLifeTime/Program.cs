@@ -301,69 +301,69 @@ namespace ControllingScopeLifeTime
 
 
             // LifeTime Scope
-            //var builder = new ContainerBuilder();
-            //builder.RegisterType<Parent>();
-            //builder.RegisterType<Child>()
-            //    .OnActivating(c =>
-            //    {
-            //        Console.WriteLine("Child Activating!!");
-            //        //c.Instance.Parent = c.Context.Resolve<Parent>();
-            //        c.ReplaceInstance(new BadChild());
-            //    }
-            //    )
-            //    .OnActivated(c=>
-            //    {
-            //        Console.WriteLine("Child Activated");
-            //        //c.Instance.Parent = c.Context.Resolve<Parent>();
-            //    }    
-            //    )
-            //    .OnRelease(c=>
-            //    {
-            //        Console.WriteLine("Child destroyed!!!!");
-            //    })
-            //    ;
+            var builder = new ContainerBuilder();
+            builder.RegisterType<Parent>();
+            builder.RegisterType<Child>()
+                .OnActivating(c =>
+                {
+                    Console.WriteLine("Child Activating!!");
+                    //c.Instance.Parent = c.Context.Resolve<Parent>();
+                    c.ReplaceInstance(new BadChild());
+                }
+                )
+                .OnActivated(c =>
+                {
+                    Console.WriteLine("Child Activated");
+                    //c.Instance.Parent = c.Context.Resolve<Parent>();
+                }
+                )
+                .OnRelease(c =>
+                {
+                    Console.WriteLine("Child destroyed!!!!");
+                })
+                ;
 
-            ////builder.RegisterType<ConsoleLog>()
-            ////    .As<ILog>()
-            ////    .OnActivating(
-            ////            c =>
-            ////            {
-            ////                c.ReplaceInstance(new SMSLog("+3314714441"));
-            ////            }
-            ////    );
+            //builder.RegisterType<ConsoleLog>()
+            //    .As<ILog>()
+            //    .OnActivating(
+            //            c =>
+            //            {
+            //                c.ReplaceInstance(new SMSLog("+3314714441"));
+            //            }
+            //    );
 
-            //builder.RegisterType<ConsoleLog>().AsSelf();
-            //builder.Register<ILog>(c => c.Resolve<ConsoleLog>())
-            //    .OnActivating(c =>
-            //    {
-            //        c.ReplaceInstance(new SMSLog("+3314714441"));
-            //    });
+            builder.RegisterType<ConsoleLog>().AsSelf();
+            builder.Register<ILog>(c => c.Resolve<ConsoleLog>())
+                .OnActivating(c =>
+                {
+                    c.ReplaceInstance(new SMSLog("+3314714441"));
+                });
 
-            //using (var container = builder.Build().BeginLifetimeScope())
-            //{
-            //    var child = container.Resolve<Child>();
-            //    var parent = child.Parent;
-            //    Console.WriteLine(child);
-            //    Console.WriteLine(parent);
+            using (var container = builder.Build().BeginLifetimeScope())
+            {
+                var child = container.Resolve<Child>();
+                var parent = child.Parent;
+                Console.WriteLine(child);
+                Console.WriteLine(parent);
 
 
 
-            //    var log = container.Resolve<ILog>();
-            //    log.Write("Testing");
-            //}
+                var log = container.Resolve<ILog>();
+                log.Write("Testing");
+            }
 
 
 
 
             // running code of startup
-            var builder = new ContainerBuilder();
-            builder.RegisterType<MyClass>().AsSelf().As<IStartable>().SingleInstance();
+            //var builder = new ContainerBuilder();
+            //builder.RegisterType<MyClass>().AsSelf().As<IStartable>().SingleInstance();
 
 
-            var container = builder.Build();
+            //var container = builder.Build();
 
 
-            var myclass = container.Resolve<MyClass>();
+            //var myclass = container.Resolve<MyClass>();
         }
     }
 }
