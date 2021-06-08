@@ -445,6 +445,19 @@ namespace AdvancedTopics
             return 42;
         }
     }
+
+
+
+    class Foo : IFoo
+    {
+        IFoo foo; 
+        public Foo(IFoo foo) { this.foo = foo; }
+    }
+
+    internal interface IFoo
+    {
+    }
+
     class Program
     {
         static void Main(string[] args)
@@ -491,8 +504,14 @@ namespace AdvancedTopics
 
             // Decorators
             //var builder = new ContainerBuilder();
+            //builder.RegisterType<Foo>().As<IFoo>();
+
+            //var food = builder.Build().Resolve<IFoo>();
+            
+
+
             //builder.RegisterType<ReportingService>().Named<IReportingService>("reporting");
-            //builder.RegisterDecorator<IReportingService>((context, service) => new ReportingServiceWithLogging(service), "reporting");
+            // builder.RegisterDecorator<IReportingService>((context, service) => new ReportingServiceWithLogging(service), "reporting");
 
             //using (var container = builder.Build())
             //{
@@ -569,16 +588,16 @@ namespace AdvancedTopics
 
 
             // Type interceptor
-            var builder = new ContainerBuilder();
-            builder.Register(c => new CallLogger(Console.Out)).As<IInterceptor>().AsSelf();
-            builder.RegisterType<Audit>().As<IAudit>().EnableClassInterceptors();
-            builder.RegisterType<Audit>().As<IAudit>().EnableInterfaceInterceptors();
+            //var builder = new ContainerBuilder();
+            //builder.Register(c => new CallLogger(Console.Out)).As<IInterceptor>().AsSelf();
+            //builder.RegisterType<Audit>().As<IAudit>().EnableClassInterceptors();
+            //builder.RegisterType<Audit>().As<IAudit>().EnableInterfaceInterceptors();
 
 
-            using (var container = builder.Build())
-            {
-                container.Resolve<IAudit>().Start(DateTime.Now);
-            }
+            //using (var container = builder.Build())
+            //{
+            //    container.Resolve<IAudit>().Start(DateTime.Now);
+            //}
 
         }
     }
